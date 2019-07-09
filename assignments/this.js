@@ -17,6 +17,7 @@ function func () {
 }
 func();
 
+
 // Principle 2
 
 // code example for Implicit Binding
@@ -28,10 +29,24 @@ const myObj = {
 }
 myObj.func();
 
+
 // Principle 3
 
 // code example for New Binding
+const MathObj = function (num1, num2) {
+   this.num1 = num1;
+   this.num2 = num2;
+   this.add = function () {
+      console.log(`${this.num1} + ${this.num2} = ${this.num1 + this.num2}`); //prints result of adding the two numbers.
+   };
+};
+const calcOne = new MathObj(20, 35);
+calcOne.add();
+const calcTwo = new MathObj(15, 65);
+calcTwo.add();
+
 
 // Principle 4
 
 // code example for Explicit Binding
+calcOne.add.call(calcTwo); //prints the result of adding the numbers set in calcTwo.
