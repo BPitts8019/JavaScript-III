@@ -7,7 +7,15 @@
   
   Each constructor function has unique properties and methods that are defined in their block comments below:
 */
-  
+
+/**
+ * Chooses a random number between 1 and the number of sides chosen.
+ * @param {number} sides 
+ */
+const rollD = (sides) => {
+	return Math.floor(Math.random() * sides ) + 1;
+};
+
 /*
   === GameObject ===
   * createdAt
@@ -15,9 +23,10 @@
   * dimensions (These represent the character's size in the video game)
   * destroy() // prototype method that returns: `${this.name} was removed from the game.`
 */
-const GameObject = function ({createdAt, name, dimensions}) {
-   this.createdAt = createdAt;
+const GameObject = function ({name, nickname, dimensions}) {
+   this.createdAt = new Date();
    this.name = name;
+   this.nickname = nickname || "";
    this.dimensions = dimensions;
 }
 GameObject.prototype.destroy = function () {
@@ -58,6 +67,18 @@ Humanoid.prototype = Object.create(CharacterStats.prototype);
 Humanoid.prototype.greet = function () {
    return `${this.name} offers a greeting in ${this.language}.`;
 };
+Humanoid.prototype.attack = function (target) {
+   const TO_HIT = 12;
+
+   //which weapon do I use?
+   //random choice for now
+   let choice = Math.random()
+
+   //did we hit the target?
+   //roll d20 to hit (toHit = TO_HIT + weapon.toHitMod)
+
+   //if so, how much damage do we deal?
+};
  
 /*
   * Inheritance chain: GameObject -> CharacterStats -> Humanoid
@@ -68,69 +89,136 @@ Humanoid.prototype.greet = function () {
 // Test you work by un-commenting these 3 objects and the list of console logs below:
 
 
-  const mage = new Humanoid({
-    createdAt: new Date(),
-    dimensions: {
-      length: 2,
-      width: 1,
-      height: 1,
-    },
-    healthPoints: 5,
-    name: 'Bruce',
-    team: 'Mage Guild',
-    weapons: [
-      'Staff of Shamalama',
-    ],
-    language: 'Common Tongue',
-  });
+//   const mage = new Humanoid({
+//    //  createdAt: new Date(),
+//     dimensions: {
+//       length: 2,
+//       width: 1,
+//       height: 1,
+//     },
+//     healthPoints: 5,
+//     name: 'Bruce',
+//     team: 'Mage Guild',
+//     weapons: [
+//       'Staff of Shamalama',
+//     ],
+//     language: 'Common Tongue',
+//   });
 
-  const swordsman = new Humanoid({
-    createdAt: new Date(),
-    dimensions: {
-      length: 2,
-      width: 2,
-      height: 2,
-    },
-    healthPoints: 15,
-    name: 'Sir Mustachio',
-    team: 'The Round Table',
-    weapons: [
-      'Giant Sword',
-      'Shield',
-    ],
-    language: 'Common Tongue',
-  });
+//   const swordsman = new Humanoid({
+//    //  createdAt: new Date(),
+//     dimensions: {
+//       length: 2,
+//       width: 2,
+//       height: 2,
+//     },
+//     healthPoints: 15,
+//     name: 'Sir Mustachio',
+//     team: 'The Round Table',
+//     weapons: [
+//       'Giant Sword',
+//       'Shield',
+//     ],
+//     language: 'Common Tongue',
+//   });
 
-  const archer = new Humanoid({
-    createdAt: new Date(),
-    dimensions: {
-      length: 1,
-      width: 2,
-      height: 4,
-    },
-    healthPoints: 10,
-    name: 'Lilith',
-    team: 'Forest Kingdom',
-    weapons: [
-      'Bow',
-      'Dagger',
-    ],
-    language: 'Elvish',
-  });
+//   const archer = new Humanoid({
+//    //  createdAt: new Date(),
+//     dimensions: {
+//       length: 1,
+//       width: 2,
+//       height: 4,
+//     },
+//     healthPoints: 10,
+//     name: 'Lilith',
+//     team: 'Forest Kingdom',
+//     weapons: [
+//       'Bow',
+//       'Dagger',
+//     ],
+//     language: 'Elvish',
+//   });
 
-  console.log(mage.createdAt); // Today's date
-  console.log(archer.dimensions); // { length: 1, width: 2, height: 4 }
-  console.log(swordsman.healthPoints); // 15
-  console.log(mage.name); // Bruce
-  console.log(swordsman.team); // The Round Table
-  console.log(mage.weapons); // Staff of Shamalama
-  console.log(archer.language); // Elvish
-  console.log(archer.greet()); // Lilith offers a greeting in Elvish.
-  console.log(mage.takeDamage()); // Bruce took damage.
-  console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
+//   console.log(mage.createdAt); // Today's date
+//   console.log(archer.dimensions); // { length: 1, width: 2, height: 4 }
+//   console.log(swordsman.healthPoints); // 15
+//   console.log(mage.name); // Bruce
+//   console.log(swordsman.team); // The Round Table
+//   console.log(mage.weapons); // Staff of Shamalama
+//   console.log(archer.language); // Elvish
+//   console.log(archer.greet()); // Lilith offers a greeting in Elvish.
+//   console.log(mage.takeDamage()); // Bruce took damage.
+//   console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
 
 
   // Stretch task: 
   // * Create Villain and Hero constructor functions that inherit from the Humanoid constructor function.  
   // * Give the Hero and Villains different methods that could be used to remove health points from objects which could result in destruction if health gets to 0 or drops below 0;
   // * Create two new objects, one a villain and one a hero and fight it out with methods!
+  
+  // * Weapons will contain three values: type, minDmg, maxDmg
+
+const Villain = function (props) {
+   Humanoid.call(this, props);
+};
+Villain.prototype = Object.create(Humanoid.prototype);
+
+
+(function () {
+   const stats = {};
+   let dieRoll = -1;
+
+   for (let i=0; i < 1000; i++) {
+      dieRoll = rollD(20);
+      if (!stats[dieRoll]) {
+         stats[dieRoll] = 1;
+      } else {
+         stats[dieRoll]++;
+      }
+   }
+
+   console.log(JSON.stringify(stats, null, 3));
+})();
+
+// const Hero = function (props) {
+//    Humanoid.call(this, props);
+// };
+// Hero.prototype = Object.create(Humanoid.prototype);
+// Hero.prototype.heal = function () {
+
+// };
+
+// const orc = new Villain({
+//    dimensions: {
+//       length: 2,
+//       width: 3,
+//       height: 4,
+//    },
+//    healthPoints: 25,
+//    name: 'Grommash Hellscream',
+//    nickname: "Grom",
+//    team: 'Iron Horde',
+//    weapons: [
+//       { type: "Battleaxe", toHitMod: 1, minDmg: 5, maxDmg: 9 },
+//       { type: "Mace", toHitMod: 0, minDmg: 3, maxDmg: 5 },
+//       { type: "Dagger", toHitMod: -2, minDmg: 1, maxDmg: 2 }
+//    ],
+//    language: 'Orcish',
+// });
+
+// const arthas = new Hero({
+//    dimensions: {
+//       length: 2,
+//       width: 2,
+//       height: 3,
+//    },
+//    healthPoints: 15,
+//    name: 'Arthas Menethil',
+//    nickname: "Arthas",
+//    team: 'Alliance',
+//    weapons: [
+//       { type: "Lightbringer", toHit: 0, minDmg: 5, maxDmg: 7 },
+//       { type: "shortsword", toHit: -1, minDmg: 3, maxDmg: 5 }
+//    ],
+//    language: 'Common',
+// });
