@@ -78,11 +78,15 @@ Humanoid.prototype.attack = function (target) {
    //did we hit the target?
    const hitTarget = rollD(20) >= BASE_TO_HIT + weapon.toHitMod;
    //how much damage is caused?
-   const damage = (hitTarget)? Math.floor(Math.random(weapon.maxDmg - weapon.minDmg + 1) + weapon.minDmg) : 0;
+   let damage = 0;
+   if (hitTarget) {
+      damage = Math.floor(Math.random() * (weapon.maxDmg - weapon.minDmg + 1)) + weapon.minDmg
+   }
+
    if (damage > 0) {
-      console.log(`${this.nickname} hits ${target.name} with his ${weapon.type}.`);
+      console.log(`${this.nickname} hits ${target.nickname} with his ${weapon.type}.`);
    } else {
-      console.log(`${this.nickname} misses ${target.name} with his ${weapon.type}.`);
+      console.log(`${this.nickname} misses ${target.nickname} with his ${weapon.type}.`);
    }
 
    //update target health
@@ -186,13 +190,14 @@ const Hero = function (props) {
    Humanoid.call(this, props);
 };
 Hero.prototype = Object.create(Humanoid.prototype);
-Hero.prototype.heal = function (maxHealth) {
-   this.healthPoints += 5;
-   if (this.healthPoints > maxHealth) {
-      this.healthPoints = maxHealth;
+Hero.prototype.heal = function () {
+   const healing = Math.round(this.maxHealth/3);
+   this.healthPoints += healing;
+   if (this.healthPoints > this.maxHealth) {
+      this.healthPoints = this.maxHealth;
    }
 
-   console.log(`${this.nickname} heals for 5 points.`);
+   console.log(`${this.nickname} heals for ${healing} points.`);
 };
 
 //---- Create Players ----//
@@ -202,10 +207,10 @@ const villain = new Villain({
       width: 3,
       height: 4,
    },
-   healthPoints: 25,
+   healthPoints: 100,
    name: 'Grommash Hellscream',
    nickname: "Grom",
-   team: 'Iron Horde',
+   team: 'The Horde',
    weapons: [
       { type: "Battleaxe", toHitMod: 1, minDmg: 5, maxDmg: 9 },
       { type: "Mace", toHitMod: 0, minDmg: 3, maxDmg: 5 },
@@ -220,13 +225,13 @@ const hero = new Hero({
       width: 2,
       height: 3,
    },
-   healthPoints: 15,
+   healthPoints: 80,
    name: 'Arthas Menethil',
    nickname: "Arthas",
-   team: 'Alliance',
+   team: 'The Alliance',
    weapons: [
-      { type: "Lightbringer", toHit: 0, minDmg: 5, maxDmg: 7 },
-      { type: "shortsword", toHit: -1, minDmg: 3, maxDmg: 5 }
+      { type: "Lightbringer", toHitMod: 0, minDmg: 5, maxDmg: 7 },
+      { type: "shortsword", toHitMod: -1, minDmg: 3, maxDmg: 5 }
    ],
    language: 'Common',
 });
@@ -246,22 +251,25 @@ const hero = new Hero({
 //       miss: 0
 //    };
 //    const numTests = 10000;
-//    const toHit = 17;
+//    const toHit = 1;
+//    const maxDmg = 7;
+//    const minDmg = 5;
 //    let dieRoll = -1;
 
 //    for (let i=0; i < numTests; i++) {
 //       // dieRoll = rollD(20);
-//       // if (!stats[dieRoll]) {
-//       //    stats[dieRoll] = 1;
-//       // } else {
-//       //    stats[dieRoll]++;
-//       // }
-//       dieRoll = rollD(20);
-//       if (dieRoll >= toHit) {
-//          stats.hit++;
+//       dieRoll = Math.floor(Math.random() * (maxDmg - minDmg + 1)) + minDmg;
+//       if (!stats[dieRoll]) {
+//          stats[dieRoll] = 1;
 //       } else {
-//          stats.miss++;
+//          stats[dieRoll]++;
 //       }
+//       // dieRoll = rollD(20);
+//       // if (dieRoll >= toHit) {
+//       //    stats.hit++;
+//       // } else {
+//       //    stats.miss++;
+//       // }
 //    }
 
 //     console.log(JSON.stringify(stats, null, 3));
@@ -270,6 +278,11 @@ const hero = new Hero({
 
 //---- GAME LOOP ----//
 do {
+   //display Player Stats
+   console.log(`---------------------`);
+   console.log(`${villain.name}: ${villain.healthPoints}`);
+   console.log(`${hero.name}: ${hero.healthPoints}`);
+
    //villain attacks first
       //berserk or attack?
    console.log(`---------------------`);
@@ -291,10 +304,13 @@ do {
 } while (villain.healthPoints > 0 && hero.healthPoints > 0);
 
 if (villain.healthPoints > 0) {
-   console.log(`${villain.name} Has killed ${hero.name}!`);
+   console.log(`${villain.name} Has killed ${hero.name}.`);
+   console.log(`${villain.team} Wins!`);
 } else if (hero.healthPoints > 0) {
-   console.log(`${hero.name} Has killed ${villain.name}!`);
+   console.log(`${hero.name} Has killed ${villain.name}.`);
+   console.log(`${hero.team} Wins!`);
 } else {
-   console.log(`Both combatants have killed each other!`);
+   console.log(`Both combatants have killed each other.`);
+   console.log(`The battle is a draw!`);
 }
-console.log(`GAME OVER!!`);
+console.log(`\nGAME OVER!!`);
