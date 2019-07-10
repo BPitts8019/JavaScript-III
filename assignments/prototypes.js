@@ -44,8 +44,8 @@ const CharacterStats = function ({healthPoints, ...rest}) {
    GameObject.call(this, rest);
 }
 CharacterStats.prototype = Object.create(GameObject.prototype);
-CharacterStats.prototype.takeDamage = function () {
-   return `${this.name} took damage.`;
+CharacterStats.prototype.takeDamage = function (damage) {
+   return `${this.name} took ${damage} damage.`;
 };
 
 /*
@@ -68,16 +68,29 @@ Humanoid.prototype.greet = function () {
    return `${this.name} offers a greeting in ${this.language}.`;
 };
 Humanoid.prototype.attack = function (target) {
-   const TO_HIT = 12;
+   const BASE_TO_HIT = 12;
 
    //which weapon do I use?
    //random choice for now
-   let choice = Math.random()
+   const weapon = this.weapons[rollD(this.weapons.length) - 1];
 
    //did we hit the target?
-   //roll d20 to hit (toHit = TO_HIT + weapon.toHitMod)
+   const hitTarget = rollD(20) >= BASE_TO_HIT + weapon.toHitMod;
+   //how much damage is caused?
+   const damage = (hitTarget)? Math.floor(Math.random(weapon.maxDmg - weapon.minDmg + 1) + weapon.minDmg) : 0;
+   console.log(`---------------------`);
+   if (damage > 0) {
+      console.log(`${this.nickname} hits ${target.name} with his ${weapon.type}.`);
+   } else {
+      console.log(`${this.nickname} misses ${target.name} with his ${weapon.type}.`);
+   }
 
-   //if so, how much damage do we deal?
+   //update target health
+   target.healthPoints -= damage;
+   console.log(target.takeDamage(damage));
+   if (target.healthPoints <= 0) {
+      console.log(target.destroy());
+   }
 };
  
 /*
@@ -162,63 +175,76 @@ const Villain = function (props) {
    Humanoid.call(this, props);
 };
 Villain.prototype = Object.create(Humanoid.prototype);
+Villain.prototype.berserk = function () {
 
+};
 
-(function () {
-   const stats = {};
-   let dieRoll = -1;
+const Hero = function (props) {
+   Humanoid.call(this, props);
+};
+Hero.prototype = Object.create(Humanoid.prototype);
+Hero.prototype.heal = function () {
+   
+};
 
-   for (let i=0; i < 1000; i++) {
-      dieRoll = rollD(20);
-      if (!stats[dieRoll]) {
-         stats[dieRoll] = 1;
-      } else {
-         stats[dieRoll]++;
-      }
-   }
+//---- Create Players ----//
+const villain = new Villain({
+   dimensions: {
+      length: 2,
+      width: 3,
+      height: 4,
+   },
+   healthPoints: 25,
+   name: 'Grommash Hellscream',
+   nickname: "Grom",
+   team: 'Iron Horde',
+   weapons: [
+      { type: "Battleaxe", toHitMod: 1, minDmg: 5, maxDmg: 9 },
+      { type: "Mace", toHitMod: 0, minDmg: 3, maxDmg: 5 },
+      { type: "Dagger", toHitMod: -2, minDmg: 1, maxDmg: 2 }
+   ],
+   language: 'Orcish',
+});
 
-   console.log(JSON.stringify(stats, null, 3));
-})();
+const hero = new Hero({
+   dimensions: {
+      length: 2,
+      width: 2,
+      height: 3,
+   },
+   healthPoints: 15,
+   name: 'Arthas Menethil',
+   nickname: "Arthas",
+   team: 'Alliance',
+   weapons: [
+      { type: "Lightbringer", toHit: 0, minDmg: 5, maxDmg: 7 },
+      { type: "shortsword", toHit: -1, minDmg: 3, maxDmg: 5 }
+   ],
+   language: 'Common',
+});
 
-// const Hero = function (props) {
-//    Humanoid.call(this, props);
-// };
-// Hero.prototype = Object.create(Humanoid.prototype);
-// Hero.prototype.heal = function () {
+villain.attack(hero);
+villain.attack(hero);
+villain.attack(hero);
 
-// };
+// //---- GAME LOOP ----//
+// const BASE = 12;
+// do {
+//    //villain attacks first
+//       //berserk or attack?
+//    if (rollD(20) >= Math.round(20/3)) {
+//       villain.berserk();
+//    } else {
+//       villain.attack();
+//    }
 
-// const orc = new Villain({
-//    dimensions: {
-//       length: 2,
-//       width: 3,
-//       height: 4,
-//    },
-//    healthPoints: 25,
-//    name: 'Grommash Hellscream',
-//    nickname: "Grom",
-//    team: 'Iron Horde',
-//    weapons: [
-//       { type: "Battleaxe", toHitMod: 1, minDmg: 5, maxDmg: 9 },
-//       { type: "Mace", toHitMod: 0, minDmg: 3, maxDmg: 5 },
-//       { type: "Dagger", toHitMod: -2, minDmg: 1, maxDmg: 2 }
-//    ],
-//    language: 'Orcish',
-// });
+//    //hero attacks second
+//       //heal or attack
+//    if (rollD(20) >= Math.round(20/4)) {
+//       hero.heal();
+//    } else {
+//       hero.attack();
+//    }
+// } while (villain.healthPoints > 0 || hero.healthPoints > 0);
 
-// const arthas = new Hero({
-//    dimensions: {
-//       length: 2,
-//       width: 2,
-//       height: 3,
-//    },
-//    healthPoints: 15,
-//    name: 'Arthas Menethil',
-//    nickname: "Arthas",
-//    team: 'Alliance',
-//    weapons: [
-//       { type: "Lightbringer", toHit: 0, minDmg: 5, maxDmg: 7 },
-//       { type: "shortsword", toHit: -1, minDmg: 3, maxDmg: 5 }
-//    ],
-//    language: 'Common',
-// });
+console.log(`GAME OVER!!`);
