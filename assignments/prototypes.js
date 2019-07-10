@@ -68,17 +68,17 @@ Humanoid.prototype.greet = function () {
    return `${this.name} offers a greeting in ${this.language}.`;
 };
 Humanoid.prototype.attack = function (target) {
-   const BASE_TO_HIT = 12;
+   const BASE_TO_HIT = 8;
 
    //which weapon do I use?
    //random choice for now
-   const weapon = this.weapons[rollD(this.weapons.length) - 1];
+   // const weapon = this.weapons[rollD(this.weapons.length) - 1];
+   const weapon = this.weapons[0];
 
    //did we hit the target?
    const hitTarget = rollD(20) >= BASE_TO_HIT + weapon.toHitMod;
    //how much damage is caused?
    const damage = (hitTarget)? Math.floor(Math.random(weapon.maxDmg - weapon.minDmg + 1) + weapon.minDmg) : 0;
-   console.log(`---------------------`);
    if (damage > 0) {
       console.log(`${this.nickname} hits ${target.name} with his ${weapon.type}.`);
    } else {
@@ -175,16 +175,24 @@ const Villain = function (props) {
    Humanoid.call(this, props);
 };
 Villain.prototype = Object.create(Humanoid.prototype);
-Villain.prototype.berserk = function () {
-
+Villain.prototype.berserk = function (target) {
+   console.log(`${this.nickname} is berserking. They get two attacks!`);
+   this.attack(target);
+   this.attack(target);
 };
 
 const Hero = function (props) {
+   this.maxHealth = props.healthPoints;
    Humanoid.call(this, props);
 };
 Hero.prototype = Object.create(Humanoid.prototype);
-Hero.prototype.heal = function () {
-   
+Hero.prototype.heal = function (maxHealth) {
+   this.healthPoints += 5;
+   if (this.healthPoints > maxHealth) {
+      this.healthPoints = maxHealth;
+   }
+
+   console.log(`${this.nickname} heals for 5 points.`);
 };
 
 //---- Create Players ----//
@@ -223,28 +231,70 @@ const hero = new Hero({
    language: 'Common',
 });
 
-villain.attack(hero);
-villain.attack(hero);
-villain.attack(hero);
-
-// //---- GAME LOOP ----//
-// const BASE = 12;
-// do {
-//    //villain attacks first
-//       //berserk or attack?
+// for (let i = 0; i < 20; i++) {
 //    if (rollD(20) >= Math.round(20/3)) {
-//       villain.berserk();
+//       console.log(`** Berserk **`);
 //    } else {
-//       villain.attack();
+//       console.log(`Attack`);
+//    }
+// }
+
+// //-- STATS TEST --//
+// (function () {
+//    const stats = {
+//       hit: 0,
+//       miss: 0
+//    };
+//    const numTests = 10000;
+//    const toHit = 17;
+//    let dieRoll = -1;
+
+//    for (let i=0; i < numTests; i++) {
+//       // dieRoll = rollD(20);
+//       // if (!stats[dieRoll]) {
+//       //    stats[dieRoll] = 1;
+//       // } else {
+//       //    stats[dieRoll]++;
+//       // }
+//       dieRoll = rollD(20);
+//       if (dieRoll >= toHit) {
+//          stats.hit++;
+//       } else {
+//          stats.miss++;
+//       }
 //    }
 
-//    //hero attacks second
-//       //heal or attack
-//    if (rollD(20) >= Math.round(20/4)) {
-//       hero.heal();
-//    } else {
-//       hero.attack();
-//    }
-// } while (villain.healthPoints > 0 || hero.healthPoints > 0);
+//     console.log(JSON.stringify(stats, null, 3));
+//     console.log(`Hit percentage: ${(stats.hit / numTests).toFixed(2) * 100}%`);
+// })();
 
+//---- GAME LOOP ----//
+do {
+   //villain attacks first
+      //berserk or attack?
+   console.log(`---------------------`);
+   if (rollD(20) >= 18) {
+      villain.berserk(hero);
+   } else {
+      villain.attack(hero);
+   }
+
+   //hero attacks second
+      //heal or attack
+   console.log(`---------------------`);
+   if (rollD(20) >= 17) {
+      hero.heal();
+   } else {
+      hero.attack(villain);
+   }
+   console.log("\n\n");
+} while (villain.healthPoints > 0 && hero.healthPoints > 0);
+
+if (villain.healthPoints > 0) {
+   console.log(`${villain.name} Has killed ${hero.name}!`);
+} else if (hero.healthPoints > 0) {
+   console.log(`${hero.name} Has killed ${villain.name}!`);
+} else {
+   console.log(`Both combatants have killed each other!`);
+}
 console.log(`GAME OVER!!`);
